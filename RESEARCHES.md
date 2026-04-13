@@ -13,8 +13,8 @@ The Thai Songkran festival has three days:
 | Wan Nao | วันเนา | Day after Maha Songkran |
 | Thaloengsok | วันเถลิงศก | New Chula Sakarat year begins |
 
-The modern Thai calendar fixes Songkran at April 13-15, but the dates according to the
-Suriya Yatra are **April 14-16** (with exceptions such as
+The modern Thai calendar fixes Songkran at April 13-15, but the dates computed
+by the Suriya Yatra are typically **April 14-16** (with exceptions such as
 BE 2551 and BE 2555 where it falls on April 13-15).
 
 ## 2. Time Units
@@ -131,7 +131,7 @@ Gregorian formula:
   → April 16, 14:40:12
 ```
 
-**Matches official announcement exactly.**
+**Result: April 16, 2026 at 14:40:12**
 
 ## 5. Maha Songkran Calculation
 
@@ -170,17 +170,7 @@ Equivalently:
   time = 357 × 108 = 38,556 sec = 10:42:36
 ```
 
-### 5.3 The 1-Second Discrepancy
-
-| Source | Maha Songkran Time |
-|---|---|
-| Approximate formula (all variants) | 10:42:36 |
-| Blog (kitty.in.th) | 10:42:36 |
-| Official announcement (ประกาศสงกรานต์) | **10:42:35** |
-
-The difference is exactly **1 second**.
-
-### 5.4 Analysis of the Discrepancy
+### 5.3 Precision Limitations
 
 The Wikipedia source text explicitly describes the 1732-kammaj offset as an
 **approximation** (ประมาณ):
@@ -195,38 +185,35 @@ It then describes the more precise alternative:
 (Or compute the actual apparent position (สมผุส) of the sun to find when
 it enters Aries.)
 
-**Root cause: kammaj quantization.**
+**Kammaj quantization limits the approximate formula's precision.**
 
-The approximate formula produces times quantized to the **108-second kammaj
-grid** (every result is an integer kammaj × 108 seconds). The official
-announcement is NOT on this grid:
-
-```
-Official time:  38,555 sec → 38555 / 108 = 356.991 kammaj (NOT integer)
-Approximate:    38,556 sec → 357 kammaj (integer)
-```
-
-The official calculation uses a more precise method (likely the full สมผุส
-true solar longitude computation) that produces sub-kammaj resolution. The
-maximum possible error from kammaj quantization is ±54 seconds.
-
-**The Thaloengsok time matches exactly** because it is DEFINED by the kammaj
-formula — no astronomical observation is involved. The Maha Songkran time
-differs because it represents an actual astronomical event (solar ingress
-into Aries) that doesn't fall on the 108-second grid.
-
-### 5.5 Verification of the Difference
+The formula produces times quantized to the **108-second kammaj grid**
+(every result is an integer kammaj × 108 seconds):
 
 ```
-Thaloengsok to Maha Songkran:
-  Approximate: 14,256 sec = 1732.000 kammaj (exact integer)
-  Official:    14,257 sec = 1732.009 kammaj (fractional)
+Nearest grid points around the Maha Songkran time:
+  356 kammaj = 38,448 sec = 10:40:48
+  357 kammaj = 38,556 sec = 10:42:36  ← formula result
+  358 kammaj = 38,664 sec = 10:44:24
 ```
 
-The official offset is 1 second longer than the fixed 1732-kammaj
-approximation for BE 2569. This offset varies by year because the true
-solar longitude calculation depends on the mandaphala (equation of center)
+The maximum possible error from this quantization is **±54 seconds**. The
+actual solar ingress (sun entering Aries) is an astronomical event that has
+no reason to land exactly on this 108-second grid.
+
+**Thaloengsok is unaffected** because it is DEFINED by the kammaj formula —
+no astronomical observation is involved. Maha Songkran is different because
+it represents an actual astronomical event (solar ingress into Aries).
+
+### 5.4 The Full สมผุส Method
+
+To compute the exact Maha Songkran time beyond the kammaj grid, the Suriya
+Yatra prescribes computing the sun's true longitude (สมผุส) and finding when
+it crosses 0° Aries. This involves the mandaphala (equation of center)
 correction, which varies with the sun's position relative to its apogee.
+The offset from Thaloengsok to Maha Songkran is therefore NOT exactly 1732
+kammaj every year — it varies slightly depending on the mandaphala at the
+Aries ingress point.
 
 ## 6. The สมผุส (True Solar Longitude) Calculation
 
@@ -296,7 +283,6 @@ mandaphala = arcJya(phala)        # inverse sine table lookup
 | 7-entry table, integer lipda | 1 lipda (~0.017°) | ~24 minutes |
 | 24-entry table, integer lipda | ~0.15 lipda | ~2 minutes |
 | Floating-point with table | continuous | sub-second |
-| Official calculation | unknown | 1 second |
 
 ### 6.5 Challenge: The Integer vs Continuous Gap
 
@@ -314,10 +300,10 @@ constant was derived within the integer framework where systematic rounding
 errors compensate each other. The continuous version diverges because those
 compensating errors are absent.
 
-To match the official 1-second precision, a hybrid approach is likely needed:
-either the traditional integer framework extended to sub-lipda precision, or
-a modern continuous computation calibrated to match the Suriya Yatra's
-sidereal frame.
+To achieve sub-kammaj precision for the Maha Songkran time, a hybrid
+approach is likely needed: either the traditional integer framework extended
+to sub-lipda precision, or a modern continuous computation calibrated to
+match the Suriya Yatra's sidereal frame.
 
 ## 7. Atta Thaloengsok (อัตตาเถลิงศก) — Additional Calendar Values
 
@@ -393,27 +379,26 @@ These values determine intercalary months (อธิกมาส) and intercalar
 
 ## 10. Open Questions
 
-1. **What exact method does the Royal Institute use for the official
-   ประกาศสงกรานต์?** The traditional integer Suriya Yatra is too coarse for
-   1-second precision. They likely use either a refined Suriya Yatra method
-   or modern astronomical computation.
+1. **What is the exact procedure for the full สมผุส Maha Songkran
+   calculation?** The traditional integer Suriya Yatra (lipda resolution)
+   is too coarse for sub-minute precision. A refined method with sub-lipda
+   or floating-point arithmetic is needed.
 
 2. **What ayanamsa (if any) aligns the Suriya Yatra sidereal frame with
    the actual stellar positions?** The Suriya Yatra uses a fixed sidereal
    frame that may have drifted from the original calibration over centuries.
 
-3. **Is the 1-second discrepancy consistent across years, or does it vary?**
-   If it varies, it confirms the mandaphala-dependent nature of the
-   correction. Verifying this requires official ประกาศสงกรานต์ data for
-   multiple years.
+3. **Can the mahamodo-api's integer สมผุส calculation be extended to
+   sub-lipda precision** for more accurate Maha Songkran timing?
 
-4. **Can the mahamodo-api's integer สมผุส calculation be extended to
-   sub-lipda precision** to match the official results?
+4. **How much does the Maha Songkran offset from Thaloengsok actually vary
+   year to year?** The mandaphala at the Aries ingress should vary slightly
+   since the mean sun's position relative to the apogee shifts each year.
 
 ## 11. Recommended Library Approach
 
 ### Tier 1 — Simple Formula (covers practical needs)
-- Thaloengsok: **exact** (kammaj formula, matches official)
+- Thaloengsok: **exact** (defined by the kammaj formula)
 - Maha Songkran: **approximate** (-2.165 day / -1732 kammaj offset, ±54 sec max)
 - Wan Nao: day after Maha Songkran
 - Traditional values: horakhun, kammajaphon, day of week, CS year
@@ -422,5 +407,4 @@ These values determine intercalary months (อธิกมาส) and intercalar
 ### Tier 2 — Full สมผุส (research project)
 - True solar longitude with mandaphala correction
 - Port mahamodo-api logic, extend to sub-lipda precision
-- Validate against official ประกาศสงกรานต์ data for multiple years
-- Goal: match official times to ±1 second
+- Goal: compute Maha Songkran time beyond the ±54 second kammaj grid
