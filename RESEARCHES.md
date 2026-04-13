@@ -13,9 +13,8 @@ The Thai Songkran festival has three days:
 | Wan Nao | วันเนา | Day after Maha Songkran |
 | Thaloengsok | วันเถลิงศก | New Chula Sakarat year begins |
 
-The modern Thai calendar fixes Songkran at April 13-15, but the official
-Royal Gazette announcement (ประกาศสงกรานต์) computes dates according to the
-Suriya Yatra, which typically gives **April 14-16** (with exceptions such as
+The modern Thai calendar fixes Songkran at April 13-15, but the dates according to the
+Suriya Yatra are **April 14-16** (with exceptions such as
 BE 2551 and BE 2555 where it falls on April 13-15).
 
 ## 2. Time Units
