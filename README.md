@@ -137,19 +137,19 @@ Note: the traditional texts (e.g., Wikipedia) define กัมมัชพลเ
 `800 - remainder` (time remaining). The reference textbook uses the remainder
 directly as กัมมัชพลถึงเวลาเถลิงศก (time to Thaloengsok). Both are valid.
 
+**Thaloengsok day composition** (BE 2569 = April 16, 2026):
+
 ```mermaid
 graph LR
-    subgraph HK["หรคุณ = 506,980 (epoch → end of day)"]
-        subgraph HK0["หรคุณ 0น. = 506,979 (epoch → midnight)"]
-            M1["<b>midnight</b><br/>0h"] -->|"489 kammaj<br/>กัมมัชพลถึงเวลาเถลิงศก"| TS["☀ <b>Thaloengsok</b><br/>14:40:12<br/><i>mean sun = 0° Aries</i>"]
-        end
-        TS -->|"311 kammaj<br/>กัมมัชพลเถลิงศก"| M2["<b>midnight</b><br/>24h"]
-    end
+    A["<b>0h</b><br/>midnight"] -->|"489 kammaj<br/>= 52,812 sec<br/>(กัมมัชพลถึงเวลาเถลิงศก)"| B["☀ <b>14:40:12</b><br/>Thaloengsok<br/><i>mean sun = 0°</i>"]
+    B -->|"311 kammaj<br/>= 33,588 sec<br/>(กัมมัชพลเถลิงศก)"| C["<b>24h</b><br/>midnight"]
 
-    style TS fill:#ffd,stroke:#f90,stroke-width:2px
+    style A fill:#e8e8e8,stroke:#999
+    style B fill:#ffd,stroke:#f90,stroke-width:2px
+    style C fill:#e8e8e8,stroke:#999
 ```
 
-*(Values shown for BE 2569)*
+หรคุณ 0น. = 506,979 (epoch → 0h) | หรคุณ = 506,980 (epoch → 24h)
 
 ### 4.2 Additional Atta Thaloengsok Values
 
@@ -382,6 +382,20 @@ Equivalently:
 ```
 
 Wan Nao = April 15, 2026 (the day between).
+
+**Maha Songkran day composition** (BE 2569 = April 14, 2026):
+
+```mermaid
+graph LR
+    A["<b>0h</b><br/>midnight"] -->|"357 kammaj<br/>= 38,556 sec<br/>(kammaj to Maha Songkran)"| B["☀ <b>10:42:36</b><br/>Maha Songkran<br/><i>true sun = 0°</i>"]
+    B -->|"443 kammaj<br/>= 47,844 sec<br/>(remaining)"| C["<b>24h</b><br/>midnight"]
+
+    style A fill:#e8e8e8,stroke:#999
+    style B fill:#f9d,stroke:#d39,stroke-width:2px
+    style C fill:#e8e8e8,stroke:#999
+```
+
+หรคุณ 0น. = 506,977 (epoch → 0h) | หรคุณ = 506,978 (epoch → 24h)
 
 ### 7.4 Precision Limitations
 
