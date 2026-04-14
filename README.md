@@ -152,17 +152,16 @@ Note: the traditional texts (e.g., Wikipedia) define กัมมัชพลเ
 `800 - remainder` (time remaining). The reference textbook uses the remainder
 directly as กัมมัชพลถึงเวลาเถลิงศก (time to Thaloengsok). Both are valid.
 
-```
-  midnight                    Thaloengsok              midnight
-  0h                          moment                   24h
-  ├───────── 489 kammaj ──────┤────── 311 kammaj ──────┤
-  │     (remainder from ÷800) │   (800 − remainder)    │
-  │  กัมมัชพลถึงเวลาเถลิงศก    │  กัมมัชพลเถลิงศก        │
-  │                           │                         │
-  │←── หรคุณ 0น. = 506,979 ──→│                         │
-  │←──────────── หรคุณ = 506,980 ──────────────────────→│
-  │                           │
-  │                    mean sun = 0° Aries
+```mermaid
+graph LR
+    subgraph HK["หรคุณ = 506,980 (epoch → end of day)"]
+        subgraph HK0["หรคุณ 0น. = 506,979 (epoch → midnight)"]
+            M1["<b>midnight</b><br/>0h"] -->|"489 kammaj<br/>กัมมัชพลถึงเวลาเถลิงศก"| TS["☀ <b>Thaloengsok</b><br/>14:40:12<br/><i>mean sun = 0° Aries</i>"]
+        end
+        TS -->|"311 kammaj<br/>กัมมัชพลเถลิงศก"| M2["<b>midnight</b><br/>24h"]
+    end
+
+    style TS fill:#ffd,stroke:#f90,stroke-width:2px
 ```
 
 *(Values shown for BE 2569)*
