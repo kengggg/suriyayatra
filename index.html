@@ -719,6 +719,7 @@ function setYear(be, reanchor) {
   } else {
     renderTableRows();
   }
+  renderDriftChart();
   updateHash(be);
 }
 
@@ -761,6 +762,7 @@ document.querySelectorAll('.era-toggle button').forEach(btn => {
     renderCards(be);
     updateTableRange();
     renderTableRows();
+    renderDriftChart();
   });
 });
 
@@ -933,7 +935,6 @@ function renderDriftChart() {
     const clickedBE = Math.round(xMin + (svgX - pad.left) / cw * (xMax - xMin));
     if (clickedBE >= 1182) {
       setYear(clickedBE, false);
-      renderDriftChart();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
