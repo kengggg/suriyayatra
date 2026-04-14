@@ -30,28 +30,6 @@ The modern Thai calendar fixes Songkran at April 13-15, but the dates computed
 by the Suriya Yatra are typically **April 14-16** (with exceptions such as
 BE 2551 and BE 2555 where it falls on April 13-15).
 
-### How the Calculations Connect
-
-```mermaid
-graph TB
-    CS["CS year<br/>(จ.ศ.)"] -->|"× 292207 + 373"| TK["total kammaj"]
-    TK -->|"÷ 800"| HK["หรคุณ 0น.<br/>(day count)"]
-    TK -->|"mod 800"| KM["กัมมัชพล<br/>(time of day)"]
-
-    HK --> MS["มัธยมอาทิตย์<br/>(mean sun)"]
-    KM --> TS_TIME["Thaloengsok<br/>date & time"]
-    HK --> TS_TIME
-
-    MS -->|"+ mandaphala"| SP["สมผุสอาทิตย์<br/>(true sun)"]
-    SP -->|"find when = 0°"| SONGKRAN["Maha Songkran<br/>date & time"]
-    MS -->|"= 0° at"| TS["Thaloengsok<br/>(mean sun = 0°)"]
-
-    SONGKRAN -.->|"≈ TS − 2.165 days"| TS
-
-    style SONGKRAN fill:#f9d,stroke:#333
-    style TS fill:#dfd,stroke:#333
-```
-
 ## 2. Units and Definitions
 
 ### Time / Angular Unit: Kammajaphon (กัมมัชพล)
@@ -79,21 +57,28 @@ are directly proportional.
 
 ### Key Terms
 
-- **ทอนรอบ / ทอน** (thon): Modular reduction — if an angle exceeds 21,600
-  lipda, subtract 21,600; if negative, add 21,600. Keeps values within one
-  full circle.
+**Calendar and time:**
+
+- **CS** (จ.ศ., Chula Sakarat): Thai minor era year. CS = BE - 1181 = CE - 638.
+- **หรคุณ** (horakhun): Cumulative day count from CS 0 epoch to end of target
+  day (24h).
+- **หรคุณ 0 น.** (horakhun 0h): Day count to start of target day (0h).
+  หรคุณ = หรคุณ 0น. + 1.
+- **วันเถลิงศก** (Thaloengsok): Day the **mean sun** enters 0° Aries; new CS year.
+- **วันมหาสงกรานต์** (Maha Songkran): Day the **true sun** enters 0° Aries;
+  ~2.165 days before Thaloengsok.
+
+**Astronomical:**
 
 - **มัธยม** (matthayom): Mean position — computed assuming uniform speed.
-
 - **สมผุส** (samaphut): True position — corrected for actual non-uniform speed.
-
-- **มันทผล** (manthaphon): Mandaphala / equation of center — the correction
-  from mean to true position.
-
-- **ภุช** (bhuja) and **โกฏิ** (koti): The sine and cosine components when
-  reducing an angle to the first quadrant (0-90°).
-
+- **มันทผล** (mandaphala): Equation of center — the correction from mean to
+  true position.
+- **ภุช** (bhuja) and **โกฏิ** (koti): Sine and cosine components when reducing
+  an angle to the first quadrant (0-90°).
 - **ฉายาเท่าขันธ์**: Correction values tabulated at each khan (15°) boundary.
+- **ทอนรอบ / ทอน** (thon): Modular reduction — keep angles within 0-21,600
+  lipda (one full circle).
 
 ### Reference Meridian
 
