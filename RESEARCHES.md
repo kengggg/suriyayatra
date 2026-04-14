@@ -1,42 +1,82 @@
 # Suriya Yatra Songkran Calculation — Research Notes
 
 Research findings for building a Python library to calculate Songkran dates
-according to the Suriya Yatra (สุริยยาตร์) calendar system.
+according to the Suriya Yatra (สุริยยาตร์) calendar system. Structure follows
+the teaching progression in the reference textbook (see References).
 
 ## 1. Overview
 
-The Thai Songkran festival has three days:
+The **Suriya Yatra** (คัมภีร์สุริยยาตร์) is a Thai astronomical treatise derived
+from the Indian Surya Siddhanta tradition. It provides the mathematical
+framework for computing planetary positions and calendar dates. The method was
+refined and modernized by อาจารย์ พลตรี บุนนาค ทองเนียม, who adapted the
+traditional calculation for use with modern arithmetic (originally published
+BE 2519/1976 CE).
 
-| Day | Thai | Meaning |
+### The Three Songkran Days
+
+| Day | Thai | Astronomical Definition |
 |---|---|---|
-| Maha Songkran | วันมหาสงกรานต์ | Sun enters Aries (ราศีเมษ) |
-| Wan Nao | วันเนา | Day after Maha Songkran |
-| Thaloengsok | วันเถลิงศก | New Chula Sakarat year begins |
+| Maha Songkran | วันมหาสงกรานต์ | **True sun** (สมผุสอาทิตย์) enters Aries |
+| Wan Nao | วันเนา | Day between Maha Songkran and Thaloengsok |
+| Thaloengsok | วันเถลิงศก | **Mean sun** (มัธยมอาทิตย์) enters Aries; new Chula Sakarat year |
+
+The critical distinction: Thaloengsok is defined by the **mean** (uniform-speed)
+sun, while Maha Songkran is defined by the **true** (actual-speed) sun. The
+difference between mean and true sun — the **mandaphala** (มันทผล, equation of
+center) — creates the ~2-day gap between the two events.
 
 The modern Thai calendar fixes Songkran at April 13-15, but the dates computed
 by the Suriya Yatra are typically **April 14-16** (with exceptions such as
 BE 2551 and BE 2555 where it falls on April 13-15).
 
-## 2. Time Units
+## 2. Units and Definitions
 
-The Suriya Yatra uses the **kammaj** (กัมมัช) as its fundamental time unit:
+### Time / Angular Unit: Kammajaphon (กัมมัชพล)
 
-| Unit | Value |
+The kammajaphon has a **dual nature** — it measures both time and angular
+position of the sun. Because the mean sun moves at a uniform rate, the two
+are directly proportional.
+
+| As time | As angle |
 |---|---|
-| 1 kammaj | 108 seconds |
-| 1 day | 800 kammaj (= 86,400 seconds) |
-| 1 sidereal year | 292,207 kammaj (= 365.258750 days) |
+| 1 kammajaphon = 108 seconds | 1 day of solar motion ≈ 59.1361 lipda |
+| 800 kammajaphon = 1 day | 292,207 kammajaphon = 1 full revolution |
+| 292,207 kammajaphon = 1 sidereal year | 1 year = 365.258750 days |
 
-This gives a year length of exactly **365 days 6 hours 12 minutes 36 seconds**.
+### Angular Units
 
-Angular units follow the Indian astronomical tradition:
+| Unit | Thai | Value |
+|---|---|---|
+| 1 circle | 1 รอบ | 360° = 12 rasi = 21,600 lipda |
+| 1 rasi | 1 ราศี | 30° = 1,800 lipda |
+| 1 degree | 1 องศา | 60 lipda |
+| 1 lipda | 1 ลิปดา | 60 pilipda (arc-minutes) |
+| 1 pilipda | 1 วิลิปดา | arc-seconds |
+| 1 khan | 1 ขันธ์ | 15° = 900 lipda (1/6 of a quadrant) |
 
-| Unit | Value |
-|---|---|
-| 1 circle | 360 degrees = 12 rasi = 21,600 lipda |
-| 1 rasi (ราศี) | 30 degrees = 1,800 lipda |
-| 1 degree (องศา) | 60 lipda (ลิปดา, arc-minutes) |
-| 1 lipda | 60 pilipda (วิลิปดา, arc-seconds) |
+### Key Terms
+
+- **ทอนรอบ / ทอน** (thon): Modular reduction — if an angle exceeds 21,600
+  lipda, subtract 21,600; if negative, add 21,600. Keeps values within one
+  full circle.
+
+- **มัธยม** (matthayom): Mean position — computed assuming uniform speed.
+
+- **สมผุส** (samaphut): True position — corrected for actual non-uniform speed.
+
+- **มันทผล** (manthaphon): Mandaphala / equation of center — the correction
+  from mean to true position.
+
+- **ภุช** (bhuja) and **โกฏิ** (koti): The sine and cosine components when
+  reducing an angle to the first quadrant (0-90°).
+
+- **ฉายาเท่าขันธ์**: Correction values tabulated at each khan (15°) boundary.
+
+### Reference Meridian
+
+The Suriya Yatra uses **Ujjain** (อุชเชนี), India as its reference meridian,
+following the original Indian astronomical tradition.
 
 ## 3. Epoch
 
@@ -46,119 +86,217 @@ Angular units follow the Indian astronomical tradition:
 | Gregorian date | Sunday, 25 March 638 CE (proleptic) |
 | Buddhist Era | BE 1181 (พ.ศ. 1181) |
 | Julian Day at midnight | 1,954,167.5 |
-| Time of Thaloengsok | 11:11:24 (= 373 kammaj from midnight) |
+| Mean sun at epoch Thaloengsok | 0 rasi 0° 0 lipda (= 0° Aries at Ujjain) |
+| Time of Thaloengsok | 11:11:24 = 373 kammajaphon from midnight |
 
-Year conversions:
+Year conversion:
 
 ```
 CS (จ.ศ.) = BE - 1181 = CE - 638
 ```
 
-## 4. Thaloengsok Calculation
+At the epoch, the mean sun is at exactly 0° Aries by definition. Each
+subsequent year, the mean sun returns to 0° at the Thaloengsok moment, offset
+by the accumulated fractional kammajaphon.
 
-### 4.1 Kammaj Formula (Traditional)
+## 4. Thaloengsok: When the Mean Sun Enters Aries
 
-From the คัมภีร์สุริยยาตร์:
+Thaloengsok (วันเถลิงศก) is the day the Chula Sakarat year changes.
+It corresponds to the moment the **mean sun** (มัธยมอาทิตย์) crosses 0° Aries
+— i.e., when the mean sun's longitude equals 0 rasi 0° 0 lipda at Ujjain.
+
+### 4.1 The Core Formula
 
 ```
 total_kammaj = 292207 × CS + 373
-horakhun     = floor(total_kammaj / 800) + 1
-kammajaphon  = 800 - (total_kammaj mod 800)
 ```
 
-Where:
-- **horakhun** (หรคุณ) = cumulative day count from epoch (1-indexed)
-- **kammajaphon** (กัมมัชพล) = kammaj remaining until end of Thaloengsok day
-
-The time of Thaloengsok within the day:
+Divide by 800:
 
 ```
-remainder   = total_kammaj mod 800         # kammaj from midnight
-time_seconds = remainder × 108
+total_kammaj / 800 = quotient ... remainder
 ```
 
-### 4.2 Julian Day Formula
+This gives two values:
+
+| Value | Name | Thai | Meaning |
+|---|---|---|---|
+| quotient | Horakhun 0h | หรคุณ 0 น. | Days from epoch to Thaloengsok day **midnight** |
+| quotient + 1 | Horakhun | หรคุณเถลิงศก | Days from epoch to Thaloengsok day **end** (24h) |
+| remainder | Kammaj to Thaloengsok | กัมมัชพลถึงเวลาเถลิงศก | Kammaj from midnight to the Thaloengsok moment |
+| 800 - remainder | Kammajaphon Thaloengsok | กัมมัชพลเถลิงศก | Kammaj remaining until end of day |
+
+Note: the traditional texts (e.g., Wikipedia) define กัมมัชพลเถลิงศก as
+`800 - remainder` (time remaining). The reference textbook uses the remainder
+directly as กัมมัชพลถึงเวลาเถลิงศก (time to Thaloengsok). Both are valid.
+
+### 4.2 Additional Atta Thaloengsok Values
+
+Beyond the date, the Suriya Yatra computes these values at each Thaloengsok
+for use in the lunisolar calendar:
 
 ```
-JD_thaloengsok = floor((292207 × CS + 373) / 800) + 1954167.5
+masaken  = floor((703 × horakhun + 650) / (692 × 30))    # lunar months elapsed
+tithi    = floor(((703 × horakhun + 650) / 692) - 30 × masaken)  # lunar day (0-29)
+avoman   = (703 × horakhun + 650) mod 692                 # lunar excess
+uccapon  = (horakhun + 2611) mod 3232                      # moon apogee position
+war      = horakhun mod 7                                  # weekday (1=Sun ... 0=Sat)
 ```
 
-### 4.3 Gregorian Decimal Formula
+These determine intercalary months (อธิกมาส) and intercalary days (อธิกวาร)
+in the Thai lunisolar calendar.
 
-Attributed to พลตรี บุนนาค ทองเนียม (Lt. Gen. Boonnag Thongniam):
-
-```
-VT = CS × 0.25875
-     + floor(CS / 100 + 0.38)
-     - floor(CS / 4 + 0.5)
-     - floor(CS / 400 + 0.595)
-     - 5.53375
-```
-
-Result: VT is a decimal number where `int(VT)` = April day number and
-`frac(VT) × 24` = hours from midnight.
-
-### 4.4 Equivalence
-
-**All three formulas are algebraically equivalent.** Verified computationally
-across BE 2540-2589 with zero difference. The Gregorian formula adds
-correction terms for the Gregorian calendar's leap year pattern:
-
-| Term | Corrects for |
-|---|---|
-| `CS × 0.25875` | Suriya Yatra year excess over 365 days |
-| `floor(CS/4 + 0.5)` | Gregorian leap day every 4 years |
-| `floor(CS/100 + 0.38)` | Gregorian century skip |
-| `floor(CS/400 + 0.595)` | Gregorian 400-year restoration |
-| `5.53375` | Base epoch alignment |
-
-### 4.5 Worked Example: BE 2569 (CE 2026)
+### 4.3 Worked Example: BE 2569 (CE 2026)
 
 ```
 CS = 2569 - 1181 = 1388
 
-Kammaj formula:
-  total_kammaj = 292207 × 1388 + 373 = 405,583,689
-  405,583,689 / 800 = 506,979 remainder 489
-  horakhun     = 506,980
-  kammajaphon  = 311
-  time         = 489 × 108 = 52,812 sec = 14:40:12
+total_kammaj = 292207 × 1388 + 373 = 405,583,689
+405,583,689 / 800 = 506,979 remainder 489
 
-Gregorian formula:
-  VT = 1388 × 0.25875 + floor(14.26) - floor(347.5) - floor(4.065) - 5.53375
-     = 359.145 + 14 - 347 - 4 - 5.53375
-     = 16.61125
-  → April 16, 14:40:12
+หรคุณ 0 น.              = 506,979 days
+หรคุณเถลิงศก             = 506,980 days
+กัมมัชพลถึงเวลาเถลิงศก   = 489 kammaj
+กัมมัชพลเถลิงศก           = 311 kammaj
+
+Time of Thaloengsok = 489 × 108 = 52,812 sec = 14:40:12
 ```
 
-**Result: April 16, 2026 at 14:40:12**
+**Result: Thaloengsok = April 16, 2026 at 14:40:12**
 
-## 5. Maha Songkran Calculation
+## 5. Mean Sun (มัธยมอาทิตย์)
 
-### 5.1 Approximate Formula (Fixed Offset)
+The **mean sun** is the sun's position assuming it orbits at a perfectly uniform
+speed. At Thaloengsok, the mean sun is at 0° Aries by definition. For any
+other date/time, the mean sun position can be computed.
 
-Maha Songkran is approximated as Thaloengsok minus a fixed interval:
+### 5.1 General Formula
+
+From the reference textbook (Ch. 4, p. 53):
 
 ```
-offset = 1732 kammaj = 2 days 3 hours 57 minutes 36 seconds = 2.165 days
+                    หรคุณ 0น.วันประสงค์ × 800 + INT(เวลาประสงค์ × 800 / 24) - 373
+mean_sun_calc =  ─────────────────────────────────────────────────────────────────
+                                            292207
+```
+
+The **remainder** from this division (in kammajaphon) gives the mean sun's
+position within its current revolution. To convert to lipda:
+
+```
+mean_sun_lipda = remainder × 21600 / 292207
+```
+
+Or equivalently, at a rate of approximately **59.1361 lipda per day**.
+
+### 5.2 At Thaloengsok
+
+At the Thaloengsok moment, the mean sun = 0° by definition. The formula
+confirms this: the total kammaj from epoch is exactly divisible by the year
+length (292,207), with the 373-kammaj epoch offset accounting for the
+sub-day timing.
+
+## 6. True Sun (สมผุสอาทิตย์)
+
+The **true sun** (สมผุสอาทิตย์) is the sun's actual position, accounting for
+its non-uniform apparent motion. The sun appears to move faster near perigee
+and slower near apogee.
+
+### 6.1 The Mandaphala Correction (มันทผล)
+
+The correction from mean to true sun is called **รวิชภูชผล** (rawicha
+bhuchaphon) or mandaphala. It depends on the mean sun's angular distance
+from the sun's apogee (อุจจ์อาทิตย์).
+
+**Sun's apogee**: Fixed at **80°** (4,800 lipda) in the Suriya Yatra.
+
+### 6.2 Procedure
+
+1. **Compute the kendra** (mean anomaly):
+   ```
+   kendra = mean_sun - 4800    (mod 21600, i.e., ทอนรอบ)
+   ```
+
+2. **Reduce to bhuja** (ภุช) — first quadrant equivalent:
+   - Quadrant 1 (0-5400 lipda): bhuja = kendra
+   - Quadrant 2 (5400-10800): bhuja = 10800 - kendra
+   - Quadrant 3 (10800-16200): bhuja = kendra - 10800
+   - Quadrant 4 (16200-21600): bhuja = 21600 - kendra
+
+3. **Look up ฉายาเท่าขันธ์** (mandaphala table) at each khan boundary,
+   interpolate for intermediate values:
+
+   | Khan | Bhuja | ฉายาเท่าขันธ์ (lipda) |
+   |---|---|---|
+   | 0 | 0° | 0 |
+   | 1 | 15° | 35 |
+   | 2 | 30° | 67 |
+   | 3 | 45° | 94 |
+   | 4 | 60° | 116 |
+   | 5 | 75° | 129 |
+   | 6 | 90° | 134 |
+
+   The maximum correction is **134 lipda ≈ 2.23°**.
+
+4. **Apply the sign** based on the kendra's half:
+   - Kendra 0-10800 (0°-180°): **subtract** mandaphala from mean sun
+   - Kendra 10800-21600 (180°-360°): **add** mandaphala to mean sun
+
+5. **True sun**:
+   ```
+   true_sun = mean_sun ± mandaphala    (ทอนรอบ to keep within 0-21600)
+   ```
+
+### 6.3 Interpretation
+
+When the mean sun is in the slow half of its orbit (past apogee, heading to
+perigee), the true sun lags behind — so the mandaphala is subtracted. When
+the mean sun is in the fast half (past perigee, heading to apogee), the true
+sun is ahead — so the mandaphala is added.
+
+## 7. Maha Songkran: When the True Sun Enters Aries
+
+**Maha Songkran** (วันมหาสงกรานต์) is the day the **true sun** crosses 0° Aries.
+Because the true sun leads the mean sun near the Aries point (kendra ≈ 280°,
+in the "fast" half), the true sun enters Aries **before** the mean sun does.
+This is why Maha Songkran precedes Thaloengsok by about 2 days.
+
+### 7.1 The ~2.165-Day Gap
+
+At the Aries ingress point:
+- Mean sun ≈ 358° (approaching 0°)
+- Kendra ≈ 278° (in the add-mandaphala zone)
+- Bhuja ≈ 82°
+- Mandaphala ≈ 131 lipda ≈ 2.18°
+
+The true sun reaches 0° when the mean sun is still at ~358° — about **2.165
+days** before the mean sun itself reaches 0° (Thaloengsok). This is the
+origin of the 1,732-kammaj offset.
+
+### 7.2 Approximate Formula (Fixed Offset)
+
+The offset is approximated as a constant:
+
+```
+offset = 1732 kammajaphon = 2 days 3 hours 57 minutes 36 seconds = 2.165 days
 ```
 
 Three equivalent expressions:
 
 ```
+# Kammaj formula
+total_kammaj_ms = 292207 × CS - 1359
+
 # JD formula
 JD_songkran = floor((292207 × CS - 1359) / 800) + 1954167.5
 
 # Gregorian formula
 MS = VT - 2.165
-
-# Kammaj formula
-total_kammaj_ms = 292207 × CS - 1359
 ```
 
-The constant -1359 comes from: 373 (epoch offset) - 1732 (Maha Songkran offset) = -1359.
+The constant -1359 = 373 (epoch offset) - 1732 (Maha Songkran offset).
 
-### 5.2 Worked Example: BE 2569
+### 7.3 Worked Example: BE 2569
 
 ```
 MS = 16.61125 - 2.165 = 14.44625
@@ -170,25 +308,17 @@ Equivalently:
   time = 357 × 108 = 38,556 sec = 10:42:36
 ```
 
-### 5.3 Precision Limitations
+Wan Nao = April 15, 2026 (the day between).
 
-The Wikipedia source text explicitly describes the 1732-kammaj offset as an
-**approximation** (ประมาณ):
+### 7.4 Precision Limitations
 
-> "สำหรับวันมหาสงกรานต์ สามารถ**ประมาณ**ได้จากหรคุณเถลิงศก"
+The approximate formula uses a **fixed** 1732-kammaj offset. In reality, the
+mandaphala at the Aries ingress varies slightly from year to year because the
+mean sun's position relative to the apogee shifts with each year's fractional
+kammaj accumulation. The fixed offset is therefore an approximation.
 
-It then describes the more precise alternative:
-
-> "หรืออาจจะคำนวณตำแหน่งที่สังเกตได้จริง (สมผุส) ของดวงอาทิตย์
-> ว่าย้ายเข้าสู่ราศีเมษ ณ วันเวลาใด"
-
-(Or compute the actual apparent position (สมผุส) of the sun to find when
-it enters Aries.)
-
-**Kammaj quantization limits the approximate formula's precision.**
-
-The formula produces times quantized to the **108-second kammaj grid**
-(every result is an integer kammaj × 108 seconds):
+Additionally, the formula produces times quantized to the **108-second kammaj
+grid** (every result is an integer kammaj × 108 seconds):
 
 ```
 Nearest grid points around the Maha Songkran time:
@@ -197,135 +327,58 @@ Nearest grid points around the Maha Songkran time:
   358 kammaj = 38,664 sec = 10:44:24
 ```
 
-The maximum possible error from this quantization is **±54 seconds**. The
-actual solar ingress (sun entering Aries) is an astronomical event that has
-no reason to land exactly on this 108-second grid.
+The maximum error from kammaj quantization is **±54 seconds**.
 
-**Thaloengsok is unaffected** because it is DEFINED by the kammaj formula —
-no astronomical observation is involved. Maha Songkran is different because
-it represents an actual astronomical event (solar ingress into Aries).
+### 7.5 Full สมผุส Method
 
-### 5.4 The Full สมผุส Method
+To compute the exact Maha Songkran time beyond the kammaj grid, one must
+compute the true solar longitude (§6) for times near the approximate date
+and find when it crosses 0° Aries by interpolation. This is the method
+described in the reference textbook's Chapter 4.
 
-To compute the exact Maha Songkran time beyond the kammaj grid, the Suriya
-Yatra prescribes computing the sun's true longitude (สมผุส) and finding when
-it crosses 0° Aries. This involves the mandaphala (equation of center)
-correction, which varies with the sun's position relative to its apogee.
-The offset from Thaloengsok to Maha Songkran is therefore NOT exactly 1732
-kammaj every year — it varies slightly depending on the mandaphala at the
-Aries ingress point.
+## 8. Equivalent Formulas for Thaloengsok
 
-## 6. The สมผุส (True Solar Longitude) Calculation
+The Thaloengsok can be expressed in three algebraically equivalent forms.
 
-The full Suriya Yatra method for finding Maha Songkran involves computing
-the sun's **true longitude** (สมผุส) and finding when it crosses 0° Aries.
-
-### 6.1 Mean Sun (มัธยมสุริย์)
-
-The mean solar longitude is proportional to elapsed time:
+### 8.1 Julian Day Formula
 
 ```
-mean_sun_lipda = (total_kammaj × 21600 / 292207) mod 21600
+JD = floor((292207 × CS + 373) / 800) + 1954167.5
 ```
 
-The mean sun rate is 21,600 lipda per 292,207 kammaj = 0.073919 lipda/kammaj.
+### 8.2 Gregorian Decimal Formula
 
-### 6.2 The Mandaphala (มันทผล) — Equation of Center
-
-Corrects the mean sun for non-uniform apparent solar motion. Key parameters:
-
-| Parameter | Thai | Value |
-|---|---|---|
-| Sun's apogee | อุจจ์อาทิตย์ | 80° (4,800 lipda) — fixed |
-| Epicycle (even quadrants) | มันทวงจร | 14° |
-| Epicycle (odd quadrants) | มันทวงจร | 13° 40' |
-| Max mandaphala | มันทผลสูงสุด | ~134 lipda (~2.23°) |
-
-**Procedure:**
-
-1. Compute kendra (mean anomaly): `kendra = mean_sun - 4800` (mod 21600)
-2. Reduce to bhuja (first quadrant): 0-90° equivalent
-3. Look up mandaphala from sine table (see below)
-4. Apply sign: subtract if kendra < 180°, add if kendra ≥ 180°
-5. True sun = mean sun ± mandaphala
-
-### 6.3 Sine Tables
-
-**7-entry simplified table** (from mahamodo-api, pre-computed mandaphala in lipda):
-
-| Bhuja | 0° | 15° | 30° | 45° | 60° | 75° | 90° |
-|---|---|---|---|---|---|---|---|
-| Mandaphala (lipda) | 0 | 35 | 67 | 94 | 116 | 129 | 134 |
-
-**24-entry Surya Siddhanta table** (Jya values, R = 3438):
+Attributed to อาจารย์ พลตรี บุนนาค ทองเนียม:
 
 ```
-  3.75°:  225    7.50°:  449   11.25°:  671   15.00°:  890
- 18.75°: 1105   22.50°: 1315   26.25°: 1520   30.00°: 1719
- 33.75°: 1910   37.50°: 2093   41.25°: 2267   45.00°: 2431
- 48.75°: 2585   52.50°: 2728   56.25°: 2859   60.00°: 2978
- 63.75°: 3084   67.50°: 3177   71.25°: 3256   75.00°: 3321
- 78.75°: 3372   82.50°: 3409   86.25°: 3431   90.00°: 3438
+VT = CS × 0.25875
+     + floor(CS / 100 + 0.38)
+     - floor(CS / 4 + 0.5)
+     - floor(CS / 400 + 0.595)
+     - 5.53375
 ```
 
-With the full Surya Siddhanta method and variable epicycle:
+Result: `int(VT)` = April day number, `frac(VT) × 24` = hours from midnight.
 
-```
-circumference = 14 - (14 - 13.667) × |Jya(kendra)| / 3438
-phala = (circumference / 360) × Jya(bhuja)
-mandaphala = arcJya(phala)        # inverse sine table lookup
-```
+The correction terms map the Suriya Yatra's linear year to the Gregorian
+calendar's leap year pattern:
 
-### 6.4 Precision Levels
+| Term | Corrects for |
+|---|---|
+| `CS × 0.25875` | Suriya Yatra year excess over 365 days |
+| `floor(CS/4 + 0.5)` | Gregorian leap day every 4 years |
+| `floor(CS/100 + 0.38)` | Gregorian century skip |
+| `floor(CS/400 + 0.595)` | Gregorian 400-year restoration |
+| `5.53375` | Base epoch alignment |
 
-| Method | Angular resolution | Time resolution |
-|---|---|---|
-| 7-entry table, integer lipda | 1 lipda (~0.017°) | ~24 minutes |
-| 24-entry table, integer lipda | ~0.15 lipda | ~2 minutes |
-| Floating-point with table | continuous | sub-second |
+### 8.3 Equivalence
 
-### 6.5 Challenge: The Integer vs Continuous Gap
+All three formulas produce identical results. Verified computationally across
+BE 2540-2589 with zero difference.
 
-The traditional integer calculation (mahamodo-style) gives true_sun = -1
-lipda at the 1732-kammaj offset, with the crossing to 0 occurring at offset
-1725 (a 7-kammaj / 12.6-minute jump due to discrete lipda steps).
+## 9. Existing Implementations
 
-The continuous calculation gives true_sun ≈ +29 lipda at the same offset,
-implying the crossing happened ~12 hours earlier. This large gap results
-from the ~32-lipda difference between integer and continuous mean sun
-computations.
-
-**The traditional system was calibrated with integer arithmetic** — the 1732
-constant was derived within the integer framework where systematic rounding
-errors compensate each other. The continuous version diverges because those
-compensating errors are absent.
-
-To achieve sub-kammaj precision for the Maha Songkran time, a hybrid
-approach is likely needed: either the traditional integer framework extended
-to sub-lipda precision, or a modern continuous computation calibrated to
-match the Suriya Yatra's sidereal frame.
-
-## 7. Atta Thaloengsok (อัตตาเถลิงศก) — Additional Calendar Values
-
-Beyond Songkran dates, the Suriya Yatra computes these values at each
-Thaloengsok for use in the lunisolar calendar:
-
-```
-horakhun    = floor((CS × 292207 + 373) / 800) + 1
-kammajaphon = 800 - (CS × 292207 + 373) mod 800
-masaken     = floor((703 × horakhun + 650) / (692 × 30))     # lunar months
-tithi       = floor(((703 × horakhun + 650) / 692) - 30 × masaken)  # lunar day
-avoman      = (703 × horakhun + 650) mod 692                  # lunar excess
-uccapon     = (horakhun + 2611) mod 3232                       # moon apogee
-war         = horakhun mod 7                                   # weekday
-```
-
-These values determine intercalary months (อธิกมาส) and intercalary days
-(อธิกวาร) in the Thai lunisolar calendar.
-
-## 8. Existing Implementations
-
-### 8.1 Python
+### Python
 
 - **pythaidate** ([github.com/hmmbug/pythaidate](https://github.com/hmmbug/pythaidate),
   [PyPI](https://pypi.org/project/pythaidate/))
@@ -335,19 +388,18 @@ These values determine intercalary months (อธิกมาส) and intercalar
   - Does NOT compute Songkran dates
 
 - **splendidmoons** ([github.com/splendidmoons/splendidmoons](https://github.com/splendidmoons/splendidmoons))
-  - Similar lunisolar calendar engine for Buddhist Uposatha days
+  - Lunisolar calendar engine for Buddhist Uposatha days
   - Same Suriya Yatra constants, no สมผุส
 
-### 8.2 JavaScript
+### JavaScript
 
 - **mahamodo-api** ([github.com/realfactory/mahamodo-api](https://github.com/realfactory/mahamodo-api))
-  - **Most complete Suriya Yatra implementation found**
+  - Most complete Suriya Yatra implementation found
   - Full สมผุส calculation for Sun, Moon, and all planets
   - Uses 7-entry mandaphala table, integer lipda resolution
-  - Thai astrology horoscope casting
   - Key file: `mahamodo-app/app/helpers/main.js` (lines 4933-5560)
 
-### 8.3 Other Languages
+### Other Languages
 
 - **KhmerCalendarBar** (Swift) — Cambodian calendar, same Suriya Yatra basis,
   different epoch constants (499 vs 373)
@@ -355,15 +407,23 @@ These values determine intercalary months (อธิกมาส) and intercalar
 - **surya-siddhanta-audit** (TypeScript) — Full Surya Siddhanta with
   24-entry sine table, not Thai-specific
 
-## 9. Key References
+## 10. References
 
-### Primary Sources
-- คัมภีร์สุริยยาตร์ ตามแนวทางอาจารย์ พลตรี บุนนาค ทองเนียม
-  (ISBN 9786163822161)
+### Primary Source
+
+- ภัณธิภร วงษ์จันทร์เพ็ญ. *คัมภีร์สุริยยาตร์ตามแนวทางอาจารย์ พลตรี บุนนาค
+  ทองเนียม.* สำนักพิมพ์บ้านแม่มด, 2558 (2015). ISBN 978-616-394-429-0.
+  188 pages. Sample PDF in `references/SuriyaYatra_Ebook_Sample.pdf`.
+  Based on the method developed by อาจารย์ พลตรี บุนนาค ทองเนียม
+  (originally refined BE 2519/1976).
+
+### Other Thai Sources
+
 - คัมภีร์สุริยยาตร์พิศดาร by ทองเจือ อ่างแก้ว
 - คัมภีร์โหราศาสตร์ไทยมาตรฐานฉบับสมบูรณ์ by หลวงวิศาลดรุณกร (อั้น สาริกบุตร)
 
 ### Web Sources
+
 - [Wikipedia: สงกรานต์](https://th.wikipedia.org/wiki/สงกรานต์) — Formula
   derivation and worked examples
 - [kitty.in.th: Songkran Calculation](https://kitty.in.th/index.php/2011/04/13/songkran-day-calculation/) —
@@ -372,35 +432,39 @@ These values determine intercalary months (อธิกมาส) and intercalar
   Calculation for 2026
 
 ### Academic
+
 - Eade, J.C. (2018). *The Calendrical Systems of Mainland South-East Asia*
 - Gislen, L. & Eade, J.C. (2019). *The Calendars of Southeast Asia 2:
   Burma, Thailand, Laos and Cambodia*
 - Faraut, F.G. (1910). *Astronomie Cambodgienne*
 
-## 10. Open Questions
+## 11. Open Questions
 
-1. **What is the exact procedure for the full สมผุส Maha Songkran
-   calculation?** The traditional integer Suriya Yatra (lipda resolution)
-   is too coarse for sub-minute precision. A refined method with sub-lipda
-   or floating-point arithmetic is needed.
+1. **Complete สมผุส worked example.** The reference PDF is a sample with
+   missing pages (Ch.4 steps 3-end are not visible). The full procedure for
+   applying the mandaphala correction needs verification from the complete
+   book or another authoritative source.
 
-2. **What ayanamsa (if any) aligns the Suriya Yatra sidereal frame with
-   the actual stellar positions?** The Suriya Yatra uses a fixed sidereal
-   frame that may have drifted from the original calibration over centuries.
+2. **Variable epicycle.** The Surya Siddhanta uses a pulsating epicycle
+   (14° at even quadrants, 13°40' at odd). Does the Thai Suriya Yatra use
+   the same, or a fixed 14°? The 7-entry table (max 134 lipda) is consistent
+   with a fixed epicycle.
 
-3. **Can the mahamodo-api's integer สมผุส calculation be extended to
-   sub-lipda precision** for more accurate Maha Songkran timing?
+3. **Sub-kammaj precision for Maha Songkran.** Computing the exact solar
+   ingress requires either sub-lipda arithmetic or interpolation between
+   integer results. The best approach for the library is TBD.
 
-4. **How much does the Maha Songkran offset from Thaloengsok actually vary
-   year to year?** The mandaphala at the Aries ingress should vary slightly
-   since the mean sun's position relative to the apogee shifts each year.
+4. **Year-to-year variation of the Maha Songkran offset.** The mandaphala
+   at the Aries ingress should vary slightly. Quantifying this variation
+   would determine whether the fixed 1732-kammaj offset is adequate for
+   all practical purposes.
 
-## 11. Recommended Library Approach
+## 12. Recommended Library Approach
 
 ### Tier 1 — Simple Formula (covers practical needs)
-- Thaloengsok: **exact** (defined by the kammaj formula)
+- Thaloengsok: **exact** (defined by the kammaj formula; mean sun = 0°)
 - Maha Songkran: **approximate** (-2.165 day / -1732 kammaj offset, ±54 sec max)
-- Wan Nao: day after Maha Songkran
+- Wan Nao: day between Maha Songkran and Thaloengsok
 - Traditional values: horakhun, kammajaphon, day of week, CS year
 - JD ↔ Gregorian conversion
 
