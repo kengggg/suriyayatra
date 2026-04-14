@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>สุริยยาตร์ — Songkran Calculator</title>
+<title>วันสงกรานต์ 10,000 ปี</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
@@ -207,6 +207,12 @@ header p {
   margin-bottom: 0.1rem;
 }
 
+.card .date-en {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 .card .weekday {
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -344,8 +350,8 @@ footer a:hover { text-decoration: underline; }
 <body>
 <main>
   <header>
-    <h1>สุริยยาตร์</h1>
-    <p>Songkran dates calculated by the Suriya Yatra</p>
+    <h1>วันสงกรานต์ 10,000 ปี</h1>
+    <p>คำนวณตามคัมภีร์สุริยยาตร์ตามวิธีของ พลตรี บุนนาค ทองเนียม</p>
   </header>
 
   <div class="input-section">
@@ -368,7 +374,7 @@ footer a:hover { text-decoration: underline; }
       <div class="date" id="ms-date"></div>
       <div class="weekday" id="ms-weekday"></div>
       <div class="time" id="ms-time"></div>
-      <div class="time-label">true sun = 0° Aries</div>
+      <div class="time-label">สมผุสอาทิตย์ = 0° true sun = 0° Aries</div>
     </div>
     <div class="card wan-nao">
       <div class="label">Wan Nao</div>
@@ -382,21 +388,21 @@ footer a:hover { text-decoration: underline; }
       <div class="date" id="ts-date"></div>
       <div class="weekday" id="ts-weekday"></div>
       <div class="time" id="ts-time"></div>
-      <div class="time-label">mean sun = 0° Aries</div>
+      <div class="time-label">มัธยมอาทิตย์ = 0° mean sun = 0° Aries</div>
     </div>
   </div>
 
   <div class="table-section">
     <div class="table-header-bar">
-      <h2>Next 10,000 Years</h2>
+      <h2>10,000 ปีถัดไป · Next 10,000 Years</h2>
       <span class="range" id="table-range"></span>
     </div>
     <div class="table-wrap">
       <div class="table-head">
-        <div>Year</div>
-        <div>Maha Songkran</div>
-        <div>Wan Nao</div>
-        <div>Thaloengsok</div>
+        <div>ปี Year</div>
+        <div>มหาสงกรานต์</div>
+        <div>วันเนา</div>
+        <div>เถลิงศก</div>
       </div>
       <div class="table-body" id="table-body">
         <div class="table-spacer" id="table-spacer"></div>
@@ -410,8 +416,6 @@ footer a:hover { text-decoration: underline; }
   </div>
 
   <footer>
-    Calculated using the Suriya Yatra (คัมภีร์สุริยยาตร์)<br>
-    Based on the method of อาจารย์ พลตรี บุนนาค ทองเนียม<br>
     <a href="https://github.com/kengggg/suriyayatra" target="_blank">View research &amp; formulas</a>
   </footer>
 </main>
@@ -423,8 +427,9 @@ let tableStartBE = 2569;
 const TOTAL_YEARS = 10000;
 const EPOCH_JD = 1954167.5;
 const WEEKDAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const WEEKDAYS_TH = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WEEKDAYS_TH = ['วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์','วันอาทิตย์'];
+const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
 function suriyaYatra(be) {
   const cs = be - 1181;
@@ -479,12 +484,20 @@ function formatTime(totalSeconds) {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
+function eraYear(ceYear, era) {
+  if (era === 'be') return ceYear + 543;
+  if (era === 'cs') return ceYear - 638;
+  return ceYear;
+}
+
 function formatDate(g) {
-  return `${g.day} ${MONTHS[g.month - 1]} ${g.year}`;
+  const y = eraYear(g.year, currentEra);
+  return `${g.day} ${MONTHS_TH[g.month - 1]} ${y}\n${g.day} ${MONTHS_EN[g.month - 1]} ${y} ${eraLabel(currentEra)}`;
 }
 
 function formatDateShort(g) {
-  return `${g.day} ${MONTHS[g.month - 1]}`;
+  const y = eraYear(g.year, currentEra);
+  return `${g.day} ${MONTHS_EN[g.month - 1]} ${y}`;
 }
 
 // ── Era Handling ──
@@ -512,24 +525,34 @@ function eraLabel(era) {
 
 // ── Render Cards ──
 
+function renderCardDate(el, g) {
+  const y = eraYear(g.year, currentEra);
+  const suffix = eraLabel(currentEra);
+  el.innerHTML = `${g.day} ${MONTHS_TH[g.month - 1]} ${y}<br><span class="date-en">${g.day} ${MONTHS_EN[g.month - 1]} ${y} ${suffix}</span>`;
+}
+
+function renderCardWeekday(el, w) {
+  el.textContent = `${WEEKDAYS_EN[w]} · ${WEEKDAYS_TH[w]}`;
+}
+
 function renderCards(be) {
   const r = suriyaYatra(be);
 
   const msG = jdToGregorian(r.mahaSongkran.jd);
   const msW = dayOfWeek(r.mahaSongkran.jd);
-  document.getElementById('ms-date').textContent = formatDate(msG);
-  document.getElementById('ms-weekday').textContent = `${WEEKDAYS_EN[msW]} · ${WEEKDAYS_TH[msW]}`;
+  renderCardDate(document.getElementById('ms-date'), msG);
+  renderCardWeekday(document.getElementById('ms-weekday'), msW);
   document.getElementById('ms-time').textContent = formatTime(r.mahaSongkran.seconds);
 
   const wnG = jdToGregorian(r.wanNao.jd);
   const wnW = dayOfWeek(r.wanNao.jd);
-  document.getElementById('wn-date').textContent = formatDate(wnG);
-  document.getElementById('wn-weekday').textContent = `${WEEKDAYS_EN[wnW]} · ${WEEKDAYS_TH[wnW]}`;
+  renderCardDate(document.getElementById('wn-date'), wnG);
+  renderCardWeekday(document.getElementById('wn-weekday'), wnW);
 
   const tsG = jdToGregorian(r.thaloengsok.jd);
   const tsW = dayOfWeek(r.thaloengsok.jd);
-  document.getElementById('ts-date').textContent = formatDate(tsG);
-  document.getElementById('ts-weekday').textContent = `${WEEKDAYS_EN[tsW]} · ${WEEKDAYS_TH[tsW]}`;
+  renderCardDate(document.getElementById('ts-date'), tsG);
+  renderCardWeekday(document.getElementById('ts-weekday'), tsW);
   document.getElementById('ts-time').textContent = formatTime(r.thaloengsok.seconds);
 }
 
@@ -663,6 +686,7 @@ document.querySelectorAll('.era-toggle button').forEach(btn => {
     btn.classList.add('active');
     currentEra = btn.dataset.era;
     yearInput.value = fromBE(be, currentEra);
+    renderCards(be);
     updateTableRange();
     renderTableRows();
   });
