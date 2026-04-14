@@ -343,7 +343,7 @@ gantt
     title Songkran BE 2569 — The Mandaphala Gap
     dateFormat YYYY-MM-DD HH:mm
     axisFormat %d %b %H:%M
-    todayMarker off
+    todayMarker on
 
     section Songkran Days
     Maha Songkran (true sun = 0°)   :active, ms, 2026-04-14 00:00, 1d
