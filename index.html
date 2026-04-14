@@ -854,8 +854,10 @@ function renderDriftChart() {
     const y1 = y(cumDay + MONTH_DAYS[m]);
     const y2 = y(cumDay + 1);
     const bandH = y2 - y1;
-    const fill = m % 2 === 0 ? 'var(--neutral-soft)' : 'transparent';
+    const fill = m % 2 === 0 ? 'var(--neutral-soft)' : 'var(--bg-card)';
     s += `<rect x="${pad.left}" y="${y1}" width="${cw}" height="${bandH}" fill="${fill}" />`;
+    // Month boundary line
+    s += `<line x1="${pad.left}" y1="${y2}" x2="${pad.left + cw}" y2="${y2}" stroke="var(--border)" stroke-width="0.5" />`;
     // Month label
     const labelY = (y1 + y2) / 2;
     s += `<text x="${pad.left - 6}" y="${labelY}" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--text-muted)">${DRIFT_MONTHS_TH[m]} ${DRIFT_MONTHS_EN[m]}</text>`;
