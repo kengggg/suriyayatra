@@ -350,6 +350,49 @@ header p {
 }
 .jump-input input:focus { outline: 2px solid var(--gold); outline-offset: -1px; }
 
+/* ── Drift Chart ── */
+.drift-section { margin-bottom: 2rem; }
+
+.drift-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.drift-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.drift-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 0.5rem 0.5rem;
+  overflow: hidden;
+}
+
+.drift-chart { width: 100%; display: block; }
+.drift-chart text { font-family: var(--font-body); }
+
+.drift-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+.drift-tooltip.visible { opacity: 1; }
+
 /* ── Footer ── */
 footer {
   text-align: center;
@@ -430,6 +473,16 @@ footer a:hover { text-decoration: underline; }
         <input type="number" id="jump-year" placeholder="BE year" min="1182">
         <button class="btn-this-year" id="btn-this-year-table">ปีนี้ This year</button>
       </div>
+    </div>
+  </div>
+
+  <div class="drift-section">
+    <div class="drift-header">
+      <h2>การเลื่อนของวันสงกรานต์ · Calendar Drift</h2>
+    </div>
+    <div class="drift-wrap" style="position:relative">
+      <svg id="drift-chart" class="drift-chart"></svg>
+      <div class="drift-tooltip" id="drift-tooltip"></div>
     </div>
   </div>
 
@@ -740,11 +793,158 @@ function loadFromHash() {
   return new Date().getFullYear() + 543;
 }
 
+// ── Drift Chart ──
+
+const DRIFT_MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DRIFT_MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const MONTH_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+function dayOfYear(g) {
+  let d = g.day;
+  for (let i = 0; i < g.month - 1; i++) d += MONTH_DAYS[i];
+  return d;
+}
+
+function dayOfYearToLabel(doy) {
+  let d = doy;
+  for (let m = 0; m < 12; m++) {
+    if (d <= MONTH_DAYS[m]) return { month: m, day: d };
+    d -= MONTH_DAYS[m];
+  }
+  return { month: 11, day: 31 };
+}
+
+function renderDriftChart() {
+  const svg = document.getElementById('drift-chart');
+  const tooltip = document.getElementById('drift-tooltip');
+  const startBE = selectedBE || (new Date().getFullYear() + 543);
+  const endBE = startBE + TOTAL_YEARS;
+  const step = 10;
+
+  // Compute data points
+  const points = [];
+  for (let be = startBE; be <= endBE; be += step) {
+    const r = suriyaYatra(be);
+    const g = jdToGregorian(r.mahaSongkran.jd);
+    const doy = dayOfYear(g);
+    points.push({ be, doy, g });
+  }
+
+  // Chart dimensions
+  const W = 700, H = 300;
+  const pad = { top: 15, right: 15, bottom: 35, left: 55 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  // Y range: full year 1-365
+  const yMin = 1, yMax = 365;
+  const xMin = startBE, xMax = endBE;
+
+  function x(be) { return pad.left + (be - xMin) / (xMax - xMin) * cw; }
+  function y(doy) { return pad.top + ch - (doy - yMin) / (yMax - yMin) * ch; }
+
+  // Build SVG content
+  let s = '';
+
+  // Month bands
+  let cumDay = 0;
+  for (let m = 0; m < 12; m++) {
+    const y1 = y(cumDay + MONTH_DAYS[m]);
+    const y2 = y(cumDay + 1);
+    const bandH = y2 - y1;
+    const fill = m % 2 === 0 ? 'var(--neutral-soft)' : 'transparent';
+    s += `<rect x="${pad.left}" y="${y1}" width="${cw}" height="${bandH}" fill="${fill}" />`;
+    // Month label
+    const labelY = (y1 + y2) / 2;
+    s += `<text x="${pad.left - 6}" y="${labelY}" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--text-muted)">${DRIFT_MONTHS_TH[m]} ${DRIFT_MONTHS_EN[m]}</text>`;
+    cumDay += MONTH_DAYS[m];
+  }
+
+  // X-axis labels
+  const xStep = Math.ceil(TOTAL_YEARS / 5 / 1000) * 1000;
+  for (let be = Math.ceil(xMin / xStep) * xStep; be <= xMax; be += xStep) {
+    const px = x(be);
+    const label = fromBE(be, currentEra);
+    s += `<line x1="${px}" y1="${pad.top}" x2="${px}" y2="${H - pad.bottom}" stroke="var(--border)" stroke-width="0.5" />`;
+    s += `<text x="${px}" y="${H - pad.bottom + 16}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${label}</text>`;
+  }
+
+  // Maha Songkran line (rose)
+  const msLine = points.map(p => `${x(p.be).toFixed(1)},${y(p.doy).toFixed(1)}`).join(' ');
+  s += `<polyline points="${msLine}" fill="none" stroke="var(--rose)" stroke-width="2" stroke-linejoin="round" />`;
+
+  // Thaloengsok line (gold) — offset ~2 days
+  const tsPoints = [];
+  for (let be = startBE; be <= endBE; be += step) {
+    const r = suriyaYatra(be);
+    const g = jdToGregorian(r.thaloengsok.jd);
+    tsPoints.push({ be, doy: dayOfYear(g) });
+  }
+  const tsLine = tsPoints.map(p => `${x(p.be).toFixed(1)},${y(p.doy).toFixed(1)}`).join(' ');
+  s += `<polyline points="${tsLine}" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" opacity="0.7" />`;
+
+  // Current marker
+  if (selectedBE >= xMin && selectedBE <= xMax) {
+    const r = suriyaYatra(selectedBE);
+    const g = jdToGregorian(r.mahaSongkran.jd);
+    const doy = dayOfYear(g);
+    s += `<circle cx="${x(selectedBE)}" cy="${y(doy)}" r="5" fill="var(--rose)" stroke="var(--bg-card)" stroke-width="2" />`;
+  }
+
+  // Legend
+  s += `<circle cx="${pad.left + 8}" cy="${H - 6}" r="4" fill="var(--rose)" />`;
+  s += `<text x="${pad.left + 16}" y="${H - 3}" font-size="9" fill="var(--text-muted)">มหาสงกรานต์ Maha Songkran</text>`;
+  s += `<circle cx="${pad.left + 185}" cy="${H - 6}" r="4" fill="var(--gold)" opacity="0.7" />`;
+  s += `<text x="${pad.left + 193}" y="${H - 3}" font-size="9" fill="var(--text-muted)">เถลิงศก Thaloengsok</text>`;
+
+  // Invisible overlay for hover
+  s += `<rect id="drift-overlay" x="${pad.left}" y="${pad.top}" width="${cw}" height="${ch}" fill="transparent" />`;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+
+  // Hover interaction
+  const overlay = document.getElementById('drift-overlay');
+  overlay.addEventListener('mousemove', (e) => {
+    const rect = svg.getBoundingClientRect();
+    const svgX = (e.clientX - rect.left) / rect.width * W;
+    const hoveredBE = Math.round(xMin + (svgX - pad.left) / cw * (xMax - xMin));
+    if (hoveredBE < xMin || hoveredBE > xMax) { tooltip.classList.remove('visible'); return; }
+
+    const r = suriyaYatra(hoveredBE);
+    const msG = jdToGregorian(r.mahaSongkran.jd);
+    const tsG = jdToGregorian(r.thaloengsok.jd);
+    const displayY = fromBE(hoveredBE, currentEra);
+
+    tooltip.innerHTML = `<b>${eraLabel(currentEra)} ${displayY}</b><br>` +
+      `มหาสงกรานต์: ${msG.day} ${MONTHS_EN[msG.month-1]}<br>` +
+      `เถลิงศก: ${tsG.day} ${MONTHS_EN[tsG.month-1]}`;
+    tooltip.classList.add('visible');
+    tooltip.style.left = `${e.clientX - svg.closest('.drift-wrap').getBoundingClientRect().left + 12}px`;
+    tooltip.style.top = `${e.clientY - svg.closest('.drift-wrap').getBoundingClientRect().top - 40}px`;
+  });
+
+  overlay.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+
+  // Click to select year
+  overlay.addEventListener('click', (e) => {
+    const rect = svg.getBoundingClientRect();
+    const svgX = (e.clientX - rect.left) / rect.width * W;
+    const clickedBE = Math.round(xMin + (svgX - pad.left) / cw * (xMax - xMin));
+    if (clickedBE >= 1182) {
+      setYear(clickedBE, false);
+      renderDriftChart();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+}
+
 // ── Init ──
 
 function init() {
   const be = loadFromHash();
   setYear(be, true);
+  renderDriftChart();
 }
 
 init();
