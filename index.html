@@ -351,7 +351,7 @@ footer a:hover { text-decoration: underline; }
   <div class="input-section">
     <div class="year-group">
       <button id="btn-dec" aria-label="Previous year">&minus;</button>
-      <input type="number" id="year-input" value="2569" min="1181" max="12569">
+      <input type="number" id="year-input" value="2569" min="1182">
       <button id="btn-inc" aria-label="Next year">&plus;</button>
     </div>
     <div class="era-toggle">
@@ -388,7 +388,7 @@ footer a:hover { text-decoration: underline; }
 
   <div class="table-section">
     <div class="table-header-bar">
-      <h2>10,000 Years</h2>
+      <h2>Next 10,000 Years</h2>
       <span class="range" id="table-range"></span>
     </div>
     <div class="table-wrap">
@@ -404,7 +404,7 @@ footer a:hover { text-decoration: underline; }
       </div>
       <div class="jump-input">
         <label for="jump-year">Jump to:</label>
-        <input type="number" id="jump-year" placeholder="BE year" min="2569" max="12569">
+        <input type="number" id="jump-year" placeholder="BE year" min="1182">
       </div>
     </div>
   </div>
@@ -419,7 +419,7 @@ footer a:hover { text-decoration: underline; }
 <script>
 // ── Suriya Yatra Core ──
 
-const START_BE = 2569;
+let tableStartBE = 2569;
 const TOTAL_YEARS = 10000;
 const EPOCH_JD = 1954167.5;
 const WEEKDAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -552,7 +552,7 @@ function renderTableRows() {
   let html = '';
 
   for (let i = startIdx; i < endIdx; i++) {
-    const be = START_BE + i;
+    const be = tableStartBE + i;
     const r = suriyaYatra(be);
     const msG = jdToGregorian(r.mahaSongkran.jd);
     const wnG = jdToGregorian(r.wanNao.jd);
@@ -574,13 +574,21 @@ function renderTableRows() {
 
 function updateTableRange() {
   const el = document.getElementById('table-range');
-  const startY = fromBE(START_BE, currentEra);
-  const endY = fromBE(START_BE + TOTAL_YEARS - 1, currentEra);
+  const startY = fromBE(tableStartBE, currentEra);
+  const endY = fromBE(tableStartBE + TOTAL_YEARS - 1, currentEra);
   el.textContent = `${eraLabel(currentEra)} ${startY} – ${endY}`;
 }
 
+function reanchorTable(be) {
+  tableStartBE = be;
+  tableSpacer.style.height = `${TOTAL_YEARS * ROW_H}px`;
+  tableBody.scrollTop = 0;
+  updateTableRange();
+  renderTableRows();
+}
+
 function scrollTableTo(be) {
-  const idx = be - START_BE;
+  const idx = be - tableStartBE;
   if (idx >= 0 && idx < TOTAL_YEARS) {
     tableBody.scrollTop = idx * ROW_H - tableBody.clientHeight / 2 + ROW_H / 2;
   }
@@ -591,7 +599,7 @@ tableBody.addEventListener('scroll', renderTableRows);
 tableRows.addEventListener('click', (e) => {
   const row = e.target.closest('.table-row');
   if (row && row.dataset.be) {
-    setYear(parseInt(row.dataset.be));
+    setYear(parseInt(row.dataset.be), false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 });
@@ -606,12 +614,16 @@ function getCurrentBE() {
   return toBE(val, currentEra);
 }
 
-function setYear(be) {
+function setYear(be, reanchor) {
   selectedBE = be;
   const display = fromBE(be, currentEra);
   yearInput.value = display;
   renderCards(be);
-  renderTableRows();
+  if (reanchor) {
+    reanchorTable(be);
+  } else {
+    renderTableRows();
+  }
   updateHash(be);
 }
 
@@ -621,7 +633,7 @@ function updateHash(be) {
 
 yearInput.addEventListener('input', () => {
   const be = getCurrentBE();
-  if (be >= 1181 && be <= 12569) {
+  if (be >= 1182) {
     renderCards(be);
     updateHash(be);
   }
@@ -630,20 +642,17 @@ yearInput.addEventListener('input', () => {
 yearInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     const be = getCurrentBE();
-    if (be >= START_BE && be < START_BE + TOTAL_YEARS) {
-      scrollTableTo(be);
-    }
+    if (be >= 1182) setYear(be, true);
   }
 });
 
 document.getElementById('btn-dec').addEventListener('click', () => {
   const be = getCurrentBE() - 1;
-  if (be >= 1181) setYear(be);
+  if (be >= 1182) setYear(be, true);
 });
 
 document.getElementById('btn-inc').addEventListener('click', () => {
-  const be = getCurrentBE() + 1;
-  if (be <= 12569) setYear(be);
+  setYear(getCurrentBE() + 1, true);
 });
 
 // Era toggle
@@ -665,10 +674,7 @@ document.getElementById('jump-year').addEventListener('keydown', (e) => {
     const val = parseInt(e.target.value);
     if (!isNaN(val)) {
       const be = toBE(val, currentEra);
-      if (be >= START_BE && be < START_BE + TOTAL_YEARS) {
-        scrollTableTo(be);
-        setYear(be);
-      }
+      if (be >= 1182) setYear(be, true);
     }
   }
 });
@@ -687,10 +693,7 @@ function loadFromHash() {
 
 function init() {
   const be = loadFromHash();
-  setYear(be);
-  updateTableRange();
-  renderTableRows();
-  scrollTableTo(be);
+  setYear(be, true);
 }
 
 init();
