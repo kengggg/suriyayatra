@@ -30,6 +30,28 @@ The modern Thai calendar fixes Songkran at April 13-15, but the dates computed
 by the Suriya Yatra are typically **April 14-16** (with exceptions such as
 BE 2551 and BE 2555 where it falls on April 13-15).
 
+### How the Calculations Connect
+
+```mermaid
+graph TB
+    CS["CS year<br/>(จ.ศ.)"] -->|"× 292207 + 373"| TK["total kammaj"]
+    TK -->|"÷ 800"| HK["หรคุณ 0น.<br/>(day count)"]
+    TK -->|"mod 800"| KM["กัมมัชพล<br/>(time of day)"]
+
+    HK --> MS["มัธยมอาทิตย์<br/>(mean sun)"]
+    KM --> TS_TIME["Thaloengsok<br/>date & time"]
+    HK --> TS_TIME
+
+    MS -->|"+ mandaphala"| SP["สมผุสอาทิตย์<br/>(true sun)"]
+    SP -->|"find when = 0°"| SONGKRAN["Maha Songkran<br/>date & time"]
+    MS -->|"= 0° at"| TS["Thaloengsok<br/>(mean sun = 0°)"]
+
+    SONGKRAN -.->|"≈ TS − 2.165 days"| TS
+
+    style SONGKRAN fill:#f9d,stroke:#333
+    style TS fill:#dfd,stroke:#333
+```
+
 ## 2. Units and Definitions
 
 ### Time / Angular Unit: Kammajaphon (กัมมัชพล)
@@ -130,6 +152,21 @@ Note: the traditional texts (e.g., Wikipedia) define กัมมัชพลเ
 `800 - remainder` (time remaining). The reference textbook uses the remainder
 directly as กัมมัชพลถึงเวลาเถลิงศก (time to Thaloengsok). Both are valid.
 
+```
+  midnight                    Thaloengsok              midnight
+  0h                          moment                   24h
+  ├───────── 489 kammaj ──────┤────── 311 kammaj ──────┤
+  │     (remainder from ÷800) │   (800 − remainder)    │
+  │  กัมมัชพลถึงเวลาเถลิงศก    │  กัมมัชพลเถลิงศก        │
+  │                           │                         │
+  │←── หรคุณ 0น. = 506,979 ──→│                         │
+  │←──────────── หรคุณ = 506,980 ──────────────────────→│
+  │                           │
+  │                    mean sun = 0° Aries
+```
+
+*(Values shown for BE 2569)*
+
 ### 4.2 Additional Atta Thaloengsok Values
 
 Beyond the date, the Suriya Yatra computes these values at each Thaloengsok
@@ -163,6 +200,24 @@ Time of Thaloengsok = 489 × 108 = 52,812 sec = 14:40:12
 ```
 
 **Result: Thaloengsok = April 16, 2026 at 14:40:12**
+
+```mermaid
+graph TD
+    T["<b>total_kammaj</b> = 292207 × 1388 + 373<br/>= 405,583,689"]
+
+    T -->|"÷ 800"| D800["<b>Day decomposition</b>"]
+    T -->|"÷ 292207"| D292["<b>Year decomposition</b>"]
+
+    D800 --> Q1["quotient = 506,979<br/><b>หรคุณ 0น.</b><br/>(days to midnight)"]
+    D800 --> R1["remainder = 489<br/><b>กัมมัชพลถึงเวลาเถลิงศก</b><br/>(kammaj to Thaloengsok)"]
+
+    Q1 --> H["+1 → 506,980<br/><b>หรคุณเถลิงศก</b><br/>(days to end of day)"]
+    R1 --> TM["× 108 → 52,812 sec<br/><b>14:40:12</b>"]
+    R1 --> KP["800 − 489 = 311<br/><b>กัมมัชพลเถลิงศก</b><br/>(kammaj remaining)"]
+
+    D292 --> Q2["quotient = 1388<br/><b>CS</b> (complete years)"]
+    D292 --> R2["remainder = 373<br/><b>epoch offset</b><br/>(kammaj into current year)"]
+```
 
 ## 5. Mean Sun (มัธยมอาทิตย์)
 
@@ -273,6 +328,23 @@ The true sun reaches 0° when the mean sun is still at ~358° — about **2.165
 days** before the mean sun itself reaches 0° (Thaloengsok). This is the
 origin of the 1,732-kammaj offset.
 
+```
+                      0° Aries ← TRUE sun arrives here first
+                         │
+                  ╭──────┼──────╮
+             330°╱  mean ↗│      ╲30°
+            ╱    sun     │           ╲
+       300°│    ~358°    │            │60°
+           │         +131 lipda       │
+  270° ────┤      (mandaphala)        ├── 90°
+           │             │            │
+       240°│             │  ☉ 80°     │120°
+            ╲            │ apogee    ╱
+             210°╲       │     ╱150°
+                  ╰──────┼──────╯
+                        180°
+```
+
 ### 7.2 Approximate Formula (Fixed Offset)
 
 The offset is approximated as a constant:
@@ -295,6 +367,22 @@ MS = VT - 2.165
 ```
 
 The constant -1359 = 373 (epoch offset) - 1732 (Maha Songkran offset).
+
+```
+     April 14          April 15          April 16
+ ────────┼─────────────────┼─────────────────┼──────────
+         │                 │                 │
+  TRUE sun = 0°            │          MEAN sun = 0°
+  ▼ Maha Songkran          │          ▼ Thaloengsok
+  10:42:36                  │          14:40:12
+         │                 │                 │
+         │    Wan Nao      │                 │
+         │                                   │
+         ├───── mandaphala gap ≈ 2.165 days ─┤
+               (1732 kammaj)
+```
+
+*(Values shown for BE 2569)*
 
 ### 7.3 Worked Example: BE 2569
 
