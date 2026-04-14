@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-A Python library for calculating Songkran dates according to the Thai Suriya Yatra (สุริยยาตร์) astronomical calendar system. See RESEARCHES.md for the mathematical foundations and formula derivations.
+A Python library for calculating Songkran dates according to the Thai Suriya Yatra (สุริยยาตร์) astronomical calendar system. See README.md for the mathematical foundations and formula derivations.
 
 ## Development
 
