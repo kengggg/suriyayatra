@@ -137,20 +137,6 @@ Note: the traditional texts (e.g., Wikipedia) define กัมมัชพลเ
 `800 - remainder` (time remaining). The reference textbook uses the remainder
 directly as กัมมัชพลถึงเวลาเถลิงศก (time to Thaloengsok). Both are valid.
 
-**Thaloengsok day composition** (BE 2569 = April 16, 2026):
-
-```mermaid
-graph LR
-    A["<b>0h</b><br/>midnight"] -->|"489 kammaj<br/>= 52,812 sec<br/>(กัมมัชพลถึงเวลาเถลิงศก)"| B["☀ <b>14:40:12</b><br/>Thaloengsok<br/><i>mean sun = 0°</i>"]
-    B -->|"311 kammaj<br/>= 33,588 sec<br/>(กัมมัชพลเถลิงศก)"| C["<b>24h</b><br/>midnight"]
-
-    style A fill:#e8e8e8,stroke:#999
-    style B fill:#ffd,stroke:#f90,stroke-width:2px
-    style C fill:#e8e8e8,stroke:#999
-```
-
-หรคุณ 0น. = 506,979 (epoch → 0h) | หรคุณ = 506,980 (epoch → 24h)
-
 ### 4.2 Additional Atta Thaloengsok Values
 
 Beyond the date, the Suriya Yatra computes these values at each Thaloengsok
@@ -383,7 +369,7 @@ Equivalently:
 
 Wan Nao = April 15, 2026 (the day between).
 
-**Maha Songkran day composition** (BE 2569 = April 14, 2026):
+**Maha Songkran day composition** (April 14, 2026):
 
 ```mermaid
 graph LR
@@ -396,6 +382,20 @@ graph LR
 ```
 
 หรคุณ 0น. = 506,977 (epoch → 0h) | หรคุณ = 506,978 (epoch → 24h)
+
+**Thaloengsok day composition** (April 16, 2026):
+
+```mermaid
+graph LR
+    A["<b>0h</b><br/>midnight"] -->|"489 kammaj<br/>= 52,812 sec<br/>(กัมมัชพลถึงเวลาเถลิงศก)"| B["☀ <b>14:40:12</b><br/>Thaloengsok<br/><i>mean sun = 0°</i>"]
+    B -->|"311 kammaj<br/>= 33,588 sec<br/>(กัมมัชพลเถลิงศก)"| C["<b>24h</b><br/>midnight"]
+
+    style A fill:#e8e8e8,stroke:#999
+    style B fill:#ffd,stroke:#f90,stroke-width:2px
+    style C fill:#e8e8e8,stroke:#999
+```
+
+หรคุณ 0น. = 506,979 (epoch → 0h) | หรคุณ = 506,980 (epoch → 24h)
 
 ### 7.4 Precision Limitations
 
