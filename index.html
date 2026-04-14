@@ -159,6 +159,21 @@ header p {
 }
 .era-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
 
+.btn-this-year {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--gold);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  transition: background 0.15s, color 0.15s;
+}
+.btn-this-year:hover { background: var(--gold-soft); color: var(--gold); }
+
 /* ── Cards ── */
 .cards {
   display: grid;
@@ -361,6 +376,7 @@ footer a:hover { text-decoration: underline; }
       <input type="number" id="year-input" value="2569" min="1182">
       <button id="btn-inc" aria-label="Next year">&plus;</button>
     </div>
+    <button class="btn-this-year" id="btn-this-year-top">ปีนี้ This year</button>
     <div class="era-toggle">
       <button class="active" data-era="be">BE</button>
       <button data-era="ce">CE</button>
@@ -412,6 +428,7 @@ footer a:hover { text-decoration: underline; }
       <div class="jump-input">
         <label for="jump-year">Jump to:</label>
         <input type="number" id="jump-year" placeholder="BE year" min="1182">
+        <button class="btn-this-year" id="btn-this-year-table">ปีนี้ This year</button>
       </div>
     </div>
   </div>
@@ -693,6 +710,14 @@ document.querySelectorAll('.era-toggle button').forEach(btn => {
     renderTableRows();
   });
 });
+
+// This year buttons
+function goThisYear() {
+  const thisYearBE = new Date().getFullYear() + 543;
+  setYear(thisYearBE, true);
+}
+document.getElementById('btn-this-year-top').addEventListener('click', goThisYear);
+document.getElementById('btn-this-year-table').addEventListener('click', goThisYear);
 
 // Jump to year in table
 document.getElementById('jump-year').addEventListener('keydown', (e) => {
