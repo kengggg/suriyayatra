@@ -367,18 +367,19 @@ MS = VT - 2.165
 
 The constant -1359 = 373 (epoch offset) - 1732 (Maha Songkran offset).
 
-```
-     April 14          April 15          April 16
- ────────┼─────────────────┼─────────────────┼──────────
-         │                 │                 │
-  TRUE sun = 0°            │          MEAN sun = 0°
-  ▼ Maha Songkran          │          ▼ Thaloengsok
-  10:42:36                  │          14:40:12
-         │                 │                 │
-         │    Wan Nao      │                 │
-         │                                   │
-         ├───── mandaphala gap ≈ 2.165 days ─┤
-               (1732 kammaj)
+```mermaid
+gantt
+    title Songkran BE 2569 — The Mandaphala Gap
+    dateFormat YYYY-MM-DD HH:mm
+    axisFormat %d %b
+
+    section Songkran Days
+    Maha Songkran (true sun = 0°)   :active, ms, 2026-04-14 00:00, 1d
+    Wan Nao                          :wn, 2026-04-15 00:00, 1d
+    Thaloengsok (mean sun = 0°)     :active, ts, 2026-04-16 00:00, 1d
+
+    section Mandaphala Gap
+    ~2.165 days / 1732 kammaj        :crit, gap, 2026-04-14 10:42, 2026-04-16 14:40
 ```
 
 *(Values shown for BE 2569)*
