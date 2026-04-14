@@ -371,12 +371,17 @@ The constant -1359 = 373 (epoch offset) - 1732 (Maha Songkran offset).
 gantt
     title Songkran BE 2569 — The Mandaphala Gap
     dateFormat YYYY-MM-DD HH:mm
-    axisFormat %d %b
+    axisFormat %d %b %H:%M
+    tickInterval 12hour
 
     section Songkran Days
     Maha Songkran (true sun = 0°)   :active, ms, 2026-04-14 00:00, 1d
     Wan Nao                          :wn, 2026-04-15 00:00, 1d
     Thaloengsok (mean sun = 0°)     :active, ts, 2026-04-16 00:00, 1d
+
+    section Exact Moments
+    Maha Songkran 10:42:36          :milestone, ms_m, 2026-04-14 10:42, 0d
+    Thaloengsok 14:40:12            :milestone, ts_m, 2026-04-16 14:40, 0d
 
     section Mandaphala Gap
     ~2.165 days / 1732 kammaj        :crit, gap, 2026-04-14 10:42, 2026-04-16 14:40
