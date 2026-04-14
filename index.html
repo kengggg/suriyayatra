@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สุริยยาตร์ — Songkran Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FDFAF5;
+  --bg-card: #FFFFFF;
+  --text: #1C1917;
+  --text-muted: #78716C;
+  --border: #E7E5E4;
+  --gold: #B45309;
+  --gold-soft: #FEF3C7;
+  --rose: #BE185D;
+  --rose-soft: #FCE7F3;
+  --neutral-soft: #F5F5F4;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --row-h: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0C0A09;
+    --bg-card: #1C1917;
+    --text: #E7E5E4;
+    --text-muted: #A8A29E;
+    --border: #292524;
+    --gold: #F59E0B;
+    --gold-soft: #451A03;
+    --rose: #F472B6;
+    --rose-soft: #500724;
+    --neutral-soft: #1C1917;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
+  }
+}
+
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+/* ── Header ── */
+header { text-align: center; margin-bottom: 2.5rem; }
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+
+header p {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ── Year Input ── */
+.input-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.year-group {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.year-group button {
+  width: 44px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.year-group button:hover { background: var(--neutral-soft); color: var(--text); }
+
+#year-input {
+  width: 7rem;
+  height: 48px;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  background: transparent;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text);
+  -moz-appearance: textfield;
+}
+#year-input::-webkit-inner-spin-button,
+#year-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+#year-input:focus { outline: none; background: var(--neutral-soft); }
+
+.era-toggle {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.era-toggle button {
+  padding: 0.5rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+}
+.era-toggle button.active {
+  background: var(--text);
+  color: var(--bg);
+}
+.era-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
+
+/* ── Cards ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 600px) {
+  .cards { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-lg); }
+
+.card .label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+.card.maha-songkran .label { color: var(--rose); }
+.card.wan-nao .label { color: var(--text-muted); }
+.card.thaloengsok .label { color: var(--gold); }
+
+.card .thai-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.card .date {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.1rem;
+}
+
+.card .weekday {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.card .time {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+.card.maha-songkran .time { background: var(--rose-soft); color: var(--rose); }
+.card.thaloengsok .time { background: var(--gold-soft); color: var(--gold); }
+
+.card .time-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* ── Table ── */
+.table-section { margin-bottom: 2rem; }
+
+.table-header-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.table-header-bar h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.table-header-bar .range {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.table-head {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr 1fr;
+  padding: 0.65rem 1rem;
+  background: var(--neutral-soft);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-body {
+  height: calc(var(--row-h) * 12);
+  overflow-y: auto;
+  position: relative;
+}
+
+.table-spacer { width: 100%; }
+
+.table-rows { position: absolute; top: 0; left: 0; right: 0; }
+
+.table-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr 1fr;
+  padding: 0 1rem;
+  height: var(--row-h);
+  align-items: center;
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.table-row { cursor: pointer; }
+.table-row:hover { background: var(--neutral-soft); }
+.table-row.selected { background: var(--gold-soft); }
+.table-row.current { font-weight: 600; }
+.table-row.selected .date-col { color: var(--text); }
+
+.table-row .year-col {
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+.table-row .date-col { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.table-row.current .date-col { color: var(--text); }
+
+.jump-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--neutral-soft);
+}
+.jump-input label { font-size: 0.75rem; color: var(--text-muted); }
+.jump-input input {
+  width: 5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: var(--font-display);
+}
+.jump-input input:focus { outline: 2px solid var(--gold); outline-offset: -1px; }
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+footer a { color: var(--gold); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>สุริยยาตร์</h1>
+    <p>Songkran dates calculated by the Suriya Yatra</p>
+  </header>
+
+  <div class="input-section">
+    <div class="year-group">
+      <button id="btn-dec" aria-label="Previous year">&minus;</button>
+      <input type="number" id="year-input" value="2569" min="1181" max="12569">
+      <button id="btn-inc" aria-label="Next year">&plus;</button>
+    </div>
+    <div class="era-toggle">
+      <button class="active" data-era="be">BE</button>
+      <button data-era="ce">CE</button>
+      <button data-era="cs">CS</button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card maha-songkran">
+      <div class="label">Maha Songkran</div>
+      <div class="thai-name">วันมหาสงกรานต์</div>
+      <div class="date" id="ms-date"></div>
+      <div class="weekday" id="ms-weekday"></div>
+      <div class="time" id="ms-time"></div>
+      <div class="time-label">true sun = 0° Aries</div>
+    </div>
+    <div class="card wan-nao">
+      <div class="label">Wan Nao</div>
+      <div class="thai-name">วันเนา</div>
+      <div class="date" id="wn-date"></div>
+      <div class="weekday" id="wn-weekday"></div>
+    </div>
+    <div class="card thaloengsok">
+      <div class="label">Thaloengsok</div>
+      <div class="thai-name">วันเถลิงศก</div>
+      <div class="date" id="ts-date"></div>
+      <div class="weekday" id="ts-weekday"></div>
+      <div class="time" id="ts-time"></div>
+      <div class="time-label">mean sun = 0° Aries</div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header-bar">
+      <h2>10,000 Years</h2>
+      <span class="range" id="table-range"></span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <div>Year</div>
+        <div>Maha Songkran</div>
+        <div>Wan Nao</div>
+        <div>Thaloengsok</div>
+      </div>
+      <div class="table-body" id="table-body">
+        <div class="table-spacer" id="table-spacer"></div>
+        <div class="table-rows" id="table-rows"></div>
+      </div>
+      <div class="jump-input">
+        <label for="jump-year">Jump to:</label>
+        <input type="number" id="jump-year" placeholder="BE year" min="2569" max="12569">
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Calculated using the Suriya Yatra (คัมภีร์สุริยยาตร์)<br>
+    Based on the method of อาจารย์ พลตรี บุนนาค ทองเนียม<br>
+    <a href="https://github.com/kengggg/suriyayatra" target="_blank">View research &amp; formulas</a>
+  </footer>
+</main>
+
+<script>
+// ── Suriya Yatra Core ──
+
+const START_BE = 2569;
+const TOTAL_YEARS = 10000;
+const EPOCH_JD = 1954167.5;
+const WEEKDAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const WEEKDAYS_TH = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function suriyaYatra(be) {
+  const cs = be - 1181;
+
+  // Thaloengsok (mean sun = 0°)
+  const totalTS = 292207 * cs + 373;
+  const qTS = Math.floor(totalTS / 800);
+  const rTS = totalTS - qTS * 800;
+  const jdTS = qTS + EPOCH_JD;
+  const secTS = rTS * 108;
+
+  // Maha Songkran (true sun = 0°, approximate)
+  const totalMS = 292207 * cs - 1359;
+  const qMS = Math.floor(totalMS / 800);
+  const rMS = totalMS - qMS * 800;
+  const jdMS = qMS + EPOCH_JD;
+  const secMS = rMS * 108;
+
+  // Wan Nao = day after Maha Songkran
+  const jdWN = jdMS + 1;
+
+  return {
+    mahaSongkran: { jd: jdMS, seconds: secMS },
+    wanNao:       { jd: jdWN, seconds: null },
+    thaloengsok:  { jd: jdTS, seconds: secTS },
+  };
+}
+
+function jdToGregorian(jd) {
+  // Algorithm from Meeus, Astronomical Algorithms
+  const z = Math.floor(jd + 0.5);
+  const a = (z < 2299161) ? z : (() => { const al = Math.floor((z - 1867216.25) / 36524.25); return z + 1 + al - Math.floor(al / 4); })();
+  const b = a + 1524;
+  const c = Math.floor((b - 122.1) / 365.25);
+  const d = Math.floor(365.25 * c);
+  const e = Math.floor((b - d) / 30.6001);
+  const day = b - d - Math.floor(30.6001 * e);
+  const month = e < 14 ? e - 1 : e - 13;
+  const year = month > 2 ? c - 4716 : c - 4715;
+  return { year, month, day };
+}
+
+function dayOfWeek(jd) {
+  // 0=Mon, 1=Tue, ..., 6=Sun
+  return Math.floor(jd + 0.5) % 7;
+}
+
+function formatTime(totalSeconds) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function formatDate(g) {
+  return `${g.day} ${MONTHS[g.month - 1]} ${g.year}`;
+}
+
+function formatDateShort(g) {
+  return `${g.day} ${MONTHS[g.month - 1]}`;
+}
+
+// ── Era Handling ──
+
+let currentEra = 'be';
+let selectedBE = null;
+
+function toBE(val, era) {
+  if (era === 'be') return val;
+  if (era === 'ce') return val + 543;
+  if (era === 'cs') return val + 1181;
+  return val;
+}
+
+function fromBE(be, era) {
+  if (era === 'be') return be;
+  if (era === 'ce') return be - 543;
+  if (era === 'cs') return be - 1181;
+  return be;
+}
+
+function eraLabel(era) {
+  return era === 'be' ? 'BE' : era === 'ce' ? 'CE' : 'CS';
+}
+
+// ── Render Cards ──
+
+function renderCards(be) {
+  const r = suriyaYatra(be);
+
+  const msG = jdToGregorian(r.mahaSongkran.jd);
+  const msW = dayOfWeek(r.mahaSongkran.jd);
+  document.getElementById('ms-date').textContent = formatDate(msG);
+  document.getElementById('ms-weekday').textContent = `${WEEKDAYS_EN[msW]} · ${WEEKDAYS_TH[msW]}`;
+  document.getElementById('ms-time').textContent = formatTime(r.mahaSongkran.seconds);
+
+  const wnG = jdToGregorian(r.wanNao.jd);
+  const wnW = dayOfWeek(r.wanNao.jd);
+  document.getElementById('wn-date').textContent = formatDate(wnG);
+  document.getElementById('wn-weekday').textContent = `${WEEKDAYS_EN[wnW]} · ${WEEKDAYS_TH[wnW]}`;
+
+  const tsG = jdToGregorian(r.thaloengsok.jd);
+  const tsW = dayOfWeek(r.thaloengsok.jd);
+  document.getElementById('ts-date').textContent = formatDate(tsG);
+  document.getElementById('ts-weekday').textContent = `${WEEKDAYS_EN[tsW]} · ${WEEKDAYS_TH[tsW]}`;
+  document.getElementById('ts-time').textContent = formatTime(r.thaloengsok.seconds);
+}
+
+// ── Virtual Table ──
+
+const ROW_H = 44;
+const BUFFER = 10;
+const tableBody = document.getElementById('table-body');
+const tableSpacer = document.getElementById('table-spacer');
+const tableRows = document.getElementById('table-rows');
+
+tableSpacer.style.height = `${TOTAL_YEARS * ROW_H}px`;
+
+function renderTableRows() {
+  const scrollTop = tableBody.scrollTop;
+  const viewH = tableBody.clientHeight;
+  const startIdx = Math.max(0, Math.floor(scrollTop / ROW_H) - BUFFER);
+  const endIdx = Math.min(TOTAL_YEARS, Math.ceil((scrollTop + viewH) / ROW_H) + BUFFER);
+
+  let html = '';
+
+  for (let i = startIdx; i < endIdx; i++) {
+    const be = START_BE + i;
+    const r = suriyaYatra(be);
+    const msG = jdToGregorian(r.mahaSongkran.jd);
+    const wnG = jdToGregorian(r.wanNao.jd);
+    const tsG = jdToGregorian(r.thaloengsok.jd);
+    const isSelected = be === selectedBE;
+    const displayYear = fromBE(be, currentEra);
+
+    html += `<div class="table-row${isSelected ? ' selected' : ''}" data-be="${be}" style="height:${ROW_H}px">
+      <div class="year-col">${displayYear}</div>
+      <div class="date-col">${formatDateShort(msG)} ${msG.year}</div>
+      <div class="date-col">${formatDateShort(wnG)} ${wnG.year}</div>
+      <div class="date-col">${formatDateShort(tsG)} ${tsG.year}</div>
+    </div>`;
+  }
+
+  tableRows.style.transform = `translateY(${startIdx * ROW_H}px)`;
+  tableRows.innerHTML = html;
+}
+
+function updateTableRange() {
+  const el = document.getElementById('table-range');
+  const startY = fromBE(START_BE, currentEra);
+  const endY = fromBE(START_BE + TOTAL_YEARS - 1, currentEra);
+  el.textContent = `${eraLabel(currentEra)} ${startY} – ${endY}`;
+}
+
+function scrollTableTo(be) {
+  const idx = be - START_BE;
+  if (idx >= 0 && idx < TOTAL_YEARS) {
+    tableBody.scrollTop = idx * ROW_H - tableBody.clientHeight / 2 + ROW_H / 2;
+  }
+}
+
+tableBody.addEventListener('scroll', renderTableRows);
+
+tableRows.addEventListener('click', (e) => {
+  const row = e.target.closest('.table-row');
+  if (row && row.dataset.be) {
+    setYear(parseInt(row.dataset.be));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// ── Event Handlers ──
+
+const yearInput = document.getElementById('year-input');
+
+function getCurrentBE() {
+  const val = parseInt(yearInput.value);
+  if (isNaN(val)) return 2569;
+  return toBE(val, currentEra);
+}
+
+function setYear(be) {
+  selectedBE = be;
+  const display = fromBE(be, currentEra);
+  yearInput.value = display;
+  renderCards(be);
+  renderTableRows();
+  updateHash(be);
+}
+
+function updateHash(be) {
+  history.replaceState(null, '', `#be=${be}`);
+}
+
+yearInput.addEventListener('input', () => {
+  const be = getCurrentBE();
+  if (be >= 1181 && be <= 12569) {
+    renderCards(be);
+    updateHash(be);
+  }
+});
+
+yearInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const be = getCurrentBE();
+    if (be >= START_BE && be < START_BE + TOTAL_YEARS) {
+      scrollTableTo(be);
+    }
+  }
+});
+
+document.getElementById('btn-dec').addEventListener('click', () => {
+  const be = getCurrentBE() - 1;
+  if (be >= 1181) setYear(be);
+});
+
+document.getElementById('btn-inc').addEventListener('click', () => {
+  const be = getCurrentBE() + 1;
+  if (be <= 12569) setYear(be);
+});
+
+// Era toggle
+document.querySelectorAll('.era-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const be = getCurrentBE();
+    document.querySelector('.era-toggle .active').classList.remove('active');
+    btn.classList.add('active');
+    currentEra = btn.dataset.era;
+    yearInput.value = fromBE(be, currentEra);
+    updateTableRange();
+    renderTableRows();
+  });
+});
+
+// Jump to year in table
+document.getElementById('jump-year').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val)) {
+      const be = toBE(val, currentEra);
+      if (be >= START_BE && be < START_BE + TOTAL_YEARS) {
+        scrollTableTo(be);
+        setYear(be);
+      }
+    }
+  }
+});
+
+// Hash routing
+function loadFromHash() {
+  const hash = location.hash.slice(1);
+  const params = new URLSearchParams(hash);
+  if (params.has('be')) return parseInt(params.get('be'));
+  if (params.has('ce')) return parseInt(params.get('ce')) + 543;
+  if (params.has('cs')) return parseInt(params.get('cs')) + 1181;
+  return new Date().getFullYear() + 543;
+}
+
+// ── Init ──
+
+function init() {
+  const be = loadFromHash();
+  setYear(be);
+  updateTableRange();
+  renderTableRows();
+  scrollTableTo(be);
+}
+
+init();
+</script>
+</body>
+</html>
