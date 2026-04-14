@@ -585,9 +585,9 @@ function renderTableRows() {
 
     html += `<div class="table-row${isSelected ? ' selected' : ''}" data-be="${be}" style="height:${ROW_H}px">
       <div class="year-col">${displayYear}</div>
-      <div class="date-col">${formatDateShort(msG)} ${msG.year}</div>
-      <div class="date-col">${formatDateShort(wnG)} ${wnG.year}</div>
-      <div class="date-col">${formatDateShort(tsG)} ${tsG.year}</div>
+      <div class="date-col">${msG.day} ${MONTHS_EN[msG.month - 1]}</div>
+      <div class="date-col">${wnG.day} ${MONTHS_EN[wnG.month - 1]}</div>
+      <div class="date-col">${tsG.day} ${MONTHS_EN[tsG.month - 1]}</div>
     </div>`;
   }
 
