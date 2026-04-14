@@ -1,8 +1,8 @@
 # Suriya Yatra Songkran Calculation — Research Notes
 
-Research findings for building a Python library to calculate Songkran dates
-according to the Suriya Yatra (สุริยยาตร์) calendar system. Structure follows
-the teaching progression in the reference textbook (see References).
+Research on calculating Songkran dates according to the Suriya Yatra
+(สุริยยาตร์) calendar system. Structure follows the teaching progression
+in the reference textbook (see References).
 
 ## 1. Overview
 
@@ -540,23 +540,10 @@ BE 2540-2589 with zero difference.
 
 3. **Sub-kammaj precision for Maha Songkran.** Computing the exact solar
    ingress requires either sub-lipda arithmetic or interpolation between
-   integer results. The best approach for the library is TBD.
+   integer results.
 
 4. **Year-to-year variation of the Maha Songkran offset.** The mandaphala
    at the Aries ingress should vary slightly. Quantifying this variation
    would determine whether the fixed 1732-kammaj offset is adequate for
    all practical purposes.
 
-## 12. Recommended Library Approach
-
-### Tier 1 — Simple Formula (covers practical needs)
-- Thaloengsok: **exact** (defined by the kammaj formula; mean sun = 0°)
-- Maha Songkran: **approximate** (-2.165 day / -1732 kammaj offset, ±54 sec max)
-- Wan Nao: day between Maha Songkran and Thaloengsok
-- Traditional values: horakhun, kammajaphon, day of week, CS year
-- JD ↔ Gregorian conversion
-
-### Tier 2 — Full สมผุส (research project)
-- True solar longitude with mandaphala correction
-- Port mahamodo-api logic, extend to sub-lipda precision
-- Goal: compute Maha Songkran time beyond the ±54 second kammaj grid
